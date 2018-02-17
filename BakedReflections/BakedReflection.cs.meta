@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: aca3994e555bbd4458efd8833be502d5
+timeCreated: 1515241534
+licenseType: Free
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - reflectionAtlas: {instanceID: 0}
+  - TargetMaterial: {instanceID: 0}
+  - ExtractShader: {fileID: 4800000, guid: 85a109257ac9ea04181bdcbdd49e25c1, type: 3}
+  - CubeMapTo2DTextureShader: {fileID: 4800000, guid: bf48cafb27726a041bf025acebd6ac42,
+      type: 3}
+  - GammaSpaceConversionShader: {fileID: 4800000, guid: d70cd8790841c9c4388d6ab33dc4788a,
+      type: 3}
+  - tmpCubemap: {instanceID: 0}
+  - tmpTexture: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
