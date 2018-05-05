@@ -1,7 +1,12 @@
 
-# BakedReflectionsUnity
+# Baked Reflections for Unity
+
+Fast and spatial aware reflections for any unwraped object. 
+
 ![exampleImage](https://github.com/julhe/BakedReflectionsUnity/blob/master/bakedReflectionExample.JPG "exampleImage")
-BakedReflections implementation for Unity by Julian Heinken (@schneckerstein) v1
+Baked Reflections / Reflection Probe Atlas implementation for Unity by Julian Heinken (@schneckerstein) v1
+
+
 USAGE:
 1. Place this script on the object you like to have reflections for.
    NOTE: The implementation relies on the second uv channel (UV2). Therefore, it will only work if you activated "Generate Lightmap UVs" in the import settings of your mesh.
