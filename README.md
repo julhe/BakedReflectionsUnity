@@ -1,4 +1,6 @@
+
 # BakedReflectionsUnity
+![exampleImage](bakedReflectionExample.jpg "exampleImage")
 BakedReflections implementation for Unity by Julian Heinken (@schneckerstein) v1
 USAGE:
 1. Place this script on the object you like to have reflections for.
