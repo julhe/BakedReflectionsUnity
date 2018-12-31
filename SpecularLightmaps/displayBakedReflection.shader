@@ -5,6 +5,7 @@ Shader "Unlit/displayBakedReflection"
 	Properties
 	{
 		_ReflectionArray ("Texture", 2D) = "white" {}
+		_Smoothness("_Smoothness", Range(0,1)) = 1
 		_sliceSize("_sliceSize", float) = 0
 		_slicesPerAxis("_slicesPerAxis", float) = 0
 		_MainTex("MainTex", 2D) = "white" { }
@@ -53,7 +54,7 @@ Shader "Unlit/displayBakedReflection"
 			{
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
-				o.uv = v.uv;// TRANSFORM_TEX(v.uv, _MainTex);
+				o.uv = v.uv;
 				o.worldPos = mul(unity_ObjectToWorld, v.vertex);
 
 				half3 wNormal = UnityObjectToWorldNormal(normal);
@@ -74,10 +75,11 @@ Shader "Unlit/displayBakedReflection"
 
 			sampler2D _ReflectionArray;
 			sampler2D _Gradient;
+			float _Smoothness;
 			fixed4 frag (v2f i) : SV_Target
 			{
 				// sample the normal map, and decode from the Unity encoding
-				half3 tnormal = UnpackNormal(tex2D(_Gradient, i.uv));
+				half3 tnormal = UnpackNormal(tex2D(_Gradient, i.uv * 10));
 
 				// transform normal from tangent to world space
 				half3 worldNormal;
@@ -90,14 +92,16 @@ Shader "Unlit/displayBakedReflection"
 				float3 reflectionVector = reflect(viewDir, worldNormal);
 				float3 tangentView = mul(worldToTangent, reflectionVector);
 
+				float smoothness = _Smoothness;
 				//return normalToLatLong(reflectionVector).xyxy;
-				float4 outColor;
+				float3 reflection;
 #ifdef BAKED_REFLECTIONS_HEMISPHERE_MODE
-				outColor = float4(SampleBakedReflection(_ReflectionArray, tangentView, i.uv).rgb, 1);
+				reflection = SampleBakedReflection(_ReflectionArray, tangentView, i.uv, smoothness).rgb;
 #else
-				outColor = float4(SampleBakedReflection(_ReflectionArray, reflectionVector, i.uv).rgb, 1);
+				reflection = SampleBakedReflection(_ReflectionArray, reflectionVector, i.uv, smoothness).rgb;
 #endif
 
+				float4 outColor = float4(reflection, 1.0); 
 			//	return float4(reflectionVector.xy * 0.5 + 0.5, 0, 1);
 			//	outColor *= 0.67;
 				float fresnel = saturate(0.67 + pow(1.0 - saturate(dot(viewDir, worldNormal)), 5));

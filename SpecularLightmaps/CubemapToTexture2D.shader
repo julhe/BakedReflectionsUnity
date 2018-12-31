@@ -58,7 +58,9 @@
 				float3 normal = oct_to_float32x3(i.uv * 2.0 - 1.0);
 #endif
 
-				return texCUBE(_MainTex, normal);
+				float4 color = texCUBE(_MainTex, normal);
+				color.a = 1;
+				return color;
 			}
 			ENDCG
 		}

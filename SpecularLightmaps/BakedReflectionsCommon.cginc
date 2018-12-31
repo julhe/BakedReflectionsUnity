@@ -2,7 +2,6 @@
 #define BAKED_REFLECTIONS_COMMON
 
 // There are two storage modes for baked reflections. Sphere and Hemisphere
-
 //Hemisphere                   |  Sphere        
 //--------------------------------------------------------------
 //+fewer Storage requierements | -More Storage   
@@ -16,7 +15,7 @@
 // === Octahedral Packing ===
 // TODO: I'm not sure if this implementation is 100% optimized.
 
-// Returns ±1
+// Returns ï¿½1
 float2 signNotZero(float2 v) {
 	return float2((v.x >= 0.0) ? +1.0 : -1.0, (v.y >= 0.0) ? +1.0 : -1.0);
 }
@@ -57,8 +56,8 @@ float2 _BakedReflectionParams;
 //x: slices per axis,
 //z: inverse of "slices per axis" for speedups
 
-float4 SampleBakedReflection(sampler2D reflectionAtlas, float3 reflectionVector, float2 uv)
-{
+
+float3 SampleBakedReflectionEx(sampler2D reflectionAtlas, float3 reflectionVector, float2 uv, float perceptualRoughness) {
 	float slicesPerAxis = _BakedReflectionParams.x;
     float slicesPerAxis_rcp = _BakedReflectionParams.y;
 	// convert reflection vector to uv of the hemisphere slice
@@ -67,7 +66,7 @@ float4 SampleBakedReflection(sampler2D reflectionAtlas, float3 reflectionVector,
 #else
 	float2 sliceUV = (float32x3_to_oct(reflectionVector) * 0.5 + 0.5);
 #endif
-
+	sliceUV = saturate(sliceUV);
     sliceUV *= slicesPerAxis_rcp;
 
 	float2 uvPixelSpace = uv * slicesPerAxis;
@@ -75,17 +74,22 @@ float4 SampleBakedReflection(sampler2D reflectionAtlas, float3 reflectionVector,
     float2 uvCeil = ceil(uvPixelSpace) * slicesPerAxis_rcp;
 
 	// perform bilinear interpolation
-	float4 smp0 = tex2D(reflectionAtlas, uvFloor + sliceUV);
-	float4 smp1 = tex2D(reflectionAtlas, float2(uvCeil.x, uvFloor.y) + sliceUV);
+	// TODO: change to tex2Dlod
+	float lodLevel = perceptualRoughness * 6.0;
+	float3 smp0 = tex2Dlod(reflectionAtlas, float4(uvFloor + sliceUV, 0, lodLevel));
+	float3 smp1 = tex2Dlod(reflectionAtlas, float4(float2(uvCeil.x, uvFloor.y) + sliceUV, 0, lodLevel));
 
 	float2 uvFrac = frac(uvPixelSpace);
-	float4 x = lerp(smp0, smp1, uvFrac.x);
+	float3 x = lerp(smp0, smp1, uvFrac.x);
 
-	float4 smp2 = tex2D(reflectionAtlas, float2(uvFloor.x, uvCeil.y) + sliceUV);
-	float4 smp3 = tex2D(reflectionAtlas, uvCeil + sliceUV);
-	float4 y = lerp(smp2, smp3, uvFrac.x);
+	float3 smp2 = tex2Dlod(reflectionAtlas, float4(float2(uvFloor.x, uvCeil.y) + sliceUV, 0, lodLevel));
+	float3 smp3 = tex2Dlod(reflectionAtlas, float4(uvCeil + sliceUV, 0, lodLevel));
+	float3 y = lerp(smp2, smp3, uvFrac.x);
 
 	return lerp(x, y, uvFrac.y);
 }
 
+float3 SampleBakedReflection(sampler2D reflectionAtlas, float3 reflectionVector, float2 uv, float smoothness) {
+	return SampleBakedReflectionEx(reflectionAtlas, reflectionVector, uv, (1.0 - smoothness));
+}
 #endif
